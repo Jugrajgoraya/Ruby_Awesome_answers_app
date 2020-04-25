@@ -22,6 +22,10 @@ class QuestionsController < ApplicationController
     def show
         id = params[:id]
         @question = Question.find(id)
+        # For the form_with helper 
+        @answer = Answer.new 
+        # For the list of answer
+        @answers = @question.answers.order(created_at: :desc)
     end
 
     def destroy
