@@ -10,11 +10,17 @@
   </head>
 
   <body>
-    <%# render method will be replaced by the template at the provided path %>
     <%= render 'shared/navbar' %>
-    <div class='container'>
-    <%# render method will be replaced by the template at the provided path %>
-    <%= yield %>
-     </div>
+      <div class='container'>
+      <%# flash is a hash available in all views. Here we're looping hash and display its contents %>
+      <%# Just to show user that things are happening %>
+        <% flash.each do |type, message| %>
+          <div class='bg-<%= type %> p-3 rounded mb-2 shadow-sm'>
+            <%= message %>
+          </div>
+        <% end %>
+      <%# render method will be replaced by the template at the provided path %>
+      <%= yield %>
+    </div>
   </body>
 </html>
