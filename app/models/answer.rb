@@ -8,6 +8,8 @@ class Answer < ApplicationRecord
   # 'optional: true' to the belongs_to method
   belongs_to :question
 
+  belongs_to :user
+
   # The following instance method are added to the 
   # Answer model with the line belongs_to :question.
   # They simplify interaction with the associated question:
