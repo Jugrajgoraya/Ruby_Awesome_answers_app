@@ -23,7 +23,6 @@ class SessionsController < ApplicationController
   end
 
   def destroy
-    byebug
     session[:user_id] = nil
     redirect_to questions_path
   end
