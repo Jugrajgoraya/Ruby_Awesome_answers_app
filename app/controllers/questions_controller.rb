@@ -10,7 +10,7 @@ class QuestionsController < ApplicationController
 
   # show all of our questions
   def index
-    @questions = Question.all.order('updated_at DESC')
+    @questions = Question.all.all_with_answer_counts.order('updated_at DESC')
   end
 
   def new
@@ -19,7 +19,7 @@ class QuestionsController < ApplicationController
 
   def create
     # params.require(:question).permit(:title, :body) => tells rails to allow an object on the params that is called question. And on that question object allow the keys :title and :body
-    @question = Question.new(params.require(:question).permit(:title, :body))
+    @question = Question.new(params.require(:question).permit(:title, :body, :tag_names))
     @question.user = current_user
     #tell active record to goahead and run the INSERT SQL query against our db. Returns true if it saves, returns false if it doesn't save
     if @question.save
@@ -36,6 +36,8 @@ class QuestionsController < ApplicationController
     @answer = Answer.new 
     # For the list of answer
     @answers = @question.answers.order(created_at: :desc)
+
+    @like = @question.likes.find_by(user: current_user)
   end
 
   def destroy
@@ -53,12 +55,19 @@ class QuestionsController < ApplicationController
   def update
     id = params[:id]
     @question = Question.find(id)
-    if @question.update(params.require(:question).permit(:title, :body))
+    if @question.update(params.require(:question).permit(:title, :body, :tag_names))
       redirect_to question_path(@question)
     else
       render :edit
     end
   end
+
+  def liked
+    # all the questions that this particular logged in user has liked
+    @questions = current_user.liked_questions.all_with_answer_counts.order(created_at: :desc)
+  end
+
+  private
 
   def authorize! 
     redirect_to root_path, alert: 'Not Authorized' unless can?(:crud, Question)

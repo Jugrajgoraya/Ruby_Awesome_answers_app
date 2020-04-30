@@ -22,6 +22,24 @@ class Question < ApplicationRecord
     # that no longer exist, likely leading to errors. 
     # Always set a dependent option to help maintain
     # referential integrity.
+    
+    has_many :taggings, dependent: :destroy 
+    has_many :tags, through: :taggings#, source: :tag
+    # If the name of the association (i.e. tags) is the same as the
+    # source singularized (i.e. tag), then the 'source:' named
+    # argument can be omitted
+    
+    has_many :likes
+    has_many :likers, through: :likes, source: :user
+    
+    # has_and_belongs_to_many(
+    #     :likes,
+    #     class_name: 'User',
+    #     join_table: 'likes',
+    #     association_foreign_key: 'user_id',
+    #     foreign_key: 'question_id'
+    # )
+
     belongs_to :user
 
     has_many(:answers, dependent: :destroy)

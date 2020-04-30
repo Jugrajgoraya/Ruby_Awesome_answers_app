@@ -24,7 +24,12 @@ Rails.application.routes.draw do
   # following RESTful conventions for a resource 
   # It will assume there is a controller named after the
   # first argument, pluralized and PascalCased
-  resources :questions do 
+  resources :questions do
+    resources :likes, shallow: true, only: [:create, :destroy]
+    # shallow: true option changes the PATH of the created route
+    # Orignal route without shallow: true => /questions/15/likes/20
+    # Route with shallow: true => likes/20
+
     # Routes written inside of a block passed to
     # a resources method will be pre-fixed by 
     # a path corresponding to the passed in symbol. 
@@ -36,6 +41,9 @@ Rails.application.routes.draw do
     # question_answers_path(<question-id>)
     # question_answer_url(<question-id>)
     # question_answers_path(@quation)
+
+    get :liked, on: :collection
+    # above route creats a path like: GET "/questions/liked" # kind of similar to questions index but only show the questions that the user has liked
   end
   get("/questions/faq", to: "questions#faq")
   # Our application is running on localhost:3000
