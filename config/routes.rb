@@ -13,6 +13,15 @@ Rails.application.routes.draw do
   # patch("/questions/:id", to: "questions#update")
 
 
+    # draws routes that look like /api/v1
+    namespace :api, defaults: { format: :json } do
+      namespace :v1 do
+        resources :questions, only: [:index, :show]
+  
+        resource :session, only: [:create, :destroy]
+      end
+    end
+
   resources :users, only: [:new, :create]
   resource :session, only: [:new, :create, :destroy]
   # notice resource here is singular. This is a different method that is like resources.
