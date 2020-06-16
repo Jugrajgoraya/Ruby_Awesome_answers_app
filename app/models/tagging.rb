@@ -5,4 +5,3 @@ class Tagging < ApplicationRecord
   # Each tag can only be applied to a question once
   validates :tag_id, uniqueness: { scope: :question_id}
 end
-

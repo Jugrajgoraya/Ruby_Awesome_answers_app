@@ -16,8 +16,6 @@ class SessionsController < ApplicationController
       redirect_to questions_path
     else
       flash[:warning] = "Couldn't log In"
-      flash[:secondary] = "yikes"
-      flash[:dasfdsfadsfsd] = 'adsfads'
       render :new
     end
   end

@@ -8,7 +8,7 @@ class Question < ApplicationRecord
     # Rails will add att_accessors for all columns
     # of the table (i.e title, body, created_at, updated_at, ...)
 
-# Adding 'dependent: :destroy' option tells Rails to
+    # Adding 'dependent: :destroy' option tells Rails to
     # delete associated records before deleting the record
     # itself. In this case, when a question is deleted,
     # its answers are deleted first to satisfy the foreign 
@@ -22,16 +22,14 @@ class Question < ApplicationRecord
     # that no longer exist, likely leading to errors. 
     # Always set a dependent option to help maintain
     # referential integrity.
-    
     has_many :taggings, dependent: :destroy 
     has_many :tags, through: :taggings#, source: :tag
     # If the name of the association (i.e. tags) is the same as the
     # source singularized (i.e. tag), then the 'source:' named
     # argument can be omitted
-    
+
     has_many :likes
     has_many :likers, through: :likes, source: :user
-    
     # has_and_belongs_to_many(
     #     :likes,
     #     class_name: 'User',
@@ -39,9 +37,7 @@ class Question < ApplicationRecord
     #     association_foreign_key: 'user_id',
     #     foreign_key: 'question_id'
     # )
-
     belongs_to :user
-
     has_many(:answers, dependent: :destroy)
     # has_many(:answers, dependent: :destroy) adds 
     # the following instance methods to the Question model:
@@ -61,7 +57,7 @@ class Question < ApplicationRecord
     # .answers.build(attribute = {}, ...)
     # .answers.create(attributes = {})
     # .answers.create!(attributes = {})
-# .answers.reload
+    # .answers.reload
 
     # V A L I D A T I O N S
     # Create validations by using the 'validates' method
@@ -123,6 +119,39 @@ class Question < ApplicationRecord
     # Equivalent to:
     scope(:search, -> (query){ where("title ILIKE ? OR body ILIKE ?", "%#{query}%", "%#{query}%") })
  
+    def tag_names 
+        self.tags.map(&:name).join(", ")
+        # The & symbol is used to tell Ruby that the following argument
+        # should be treated as a block givent to the method. So the line:
+        # self.tags.map(&:name).join(", ")
+        # is equivalent to:
+        # self.tags.map { |x| x.name }.join(", ")
+        # So the above will iterate over the collection self.tags
+        # and build an array with the result of the name method 
+        # called on every item. (We then join the array into a comma
+        # separated string)
+    end
+
+    # Appending = at the end of a method name, allows us to implement
+    # a 'setter'. A setter is a method that is assignable.
+    # Example: 
+    # q.tag_names = "stuff, yo"
+
+    # The code in the example above would call the method we wrote 
+    # below where the value on the right-hand side of the '=' would 
+    # become the argument to the method 
+
+    # This is similar to implementing an 'attr_writer'
+    def tag_names=(rhs)
+        self.tags = rhs.strip.split(/\s*,\s*/).map do |tag_name| 
+            # Finds the first record with the given attributes, or
+            # initializes a record (Tag.new) with the attributes
+            # if one is not found 
+            Tag.find_or_initialize_by(name: tag_name)
+            # If a tag with name tag_name is not found,
+            # it will call Tag.new(name: tag_name)
+        end
+    end
 
     private 
     
@@ -143,6 +172,14 @@ class Question < ApplicationRecord
 
     def set_default_view_count
         self.view_count ||= 10
+    end
+
+    def self.all_with_answer_counts
+        self
+            .left_outer_joins(:answers)
+            .select("questions.*", "COUNT(answers.*) AS answers_count")
+            .group("questions.id")
+            # https://edgeguides.rubyonrails.org/active_record_querying.html#left-outer-joins
     end
     
     
@@ -276,4 +313,3 @@ class Question < ApplicationRecord
     # Solution:
     # Question.where('created_at >= ?', 3.days.ago).order(view_count: :DESC).limit(10)
 end
-
